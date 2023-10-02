@@ -11,3 +11,4 @@ def test_simple_func(a, b):
 
     assert my_simple_function(a, b) == f"{b}-{a}"
 
+# comment
