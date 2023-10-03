@@ -61,3 +61,27 @@ def test_hypothesis(n):
     assert solution_length == expected_length, f"Wrong length: " \
                                                f"got {solution_length}, " \
                                                f"but {expected_length} was expected"
+
+
+@pytest.mark.parametrize('arg', ['a', '1', '-1', -1, 1.0, 0.5, 0, '1/2', 'ahalay mahalay'])
+def test_bad_args_get_seq_len(arg):
+    function_result = get_seq_len(arg)
+    assert function_result is None, f"Bad arguments must lead to None. " \
+                                    f"Bad argument: \"{arg}\", " \
+                                    f"function result: {function_result}"
+
+
+@pytest.mark.parametrize('lower', ['a', '1', '-1', -1, 1.0, 0.5, 0, '1/2', 'ahalay mahalay', 100])
+@pytest.mark.parametrize('upper', ['a', '1', '-1', -1, 1.0, 0.5, 0, '1/2', 'ahalay mahalay', 10])
+def test_bad_args_get_seq_len(lower, upper):
+    print(lower, upper)
+    try:
+        function_result = get_longest_seq(lower, upper)
+        assert function_result is None, f"Bad arguments must lead to None. " \
+                                    f"Bad arguments are: lower: \"{lower}\", upper: \"{upper}\"." \
+                                    f"function result: {function_result}"
+    except TypeError as ex:
+        msg = f"Bad arguments must lead to None. " \
+              f"Bad arguments are: lower: \"{lower}\", upper: \"{upper}\"." \
+              f"Function failed with Exception: " + str(ex)
+        raise TypeError(msg)
