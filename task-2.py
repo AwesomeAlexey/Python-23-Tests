@@ -1,4 +1,5 @@
 import random
+import pytest
 
 from typing import List, Tuple
 from app import get_seq_len, get_longest_seq
@@ -17,10 +18,10 @@ def author_get_sequence_length(n: int) -> Tuple[int, List[int]]:
 
 def author_get_longest_sequence(lower: int, upper: int) -> Tuple[int, int]:
 
-    max_length, seq = author_get_sequence_length(upper)
-    max_n = upper
+    max_length, _ = author_get_sequence_length(lower)
+    max_n = lower
 
-    for n in range(lower, upper):
+    for n in range(lower + 1, upper + 1):
         sequence_length, seq = author_get_sequence_length(n)
         if sequence_length > max_length:
             max_n = n
@@ -51,3 +52,12 @@ def test_get_longest_sequence():
         assert solution_length == expected_length, f"Wrong length: " \
                                                    f"got {solution_length}, " \
                                                    f"but {expected_length} was expected"
+
+
+@pytest.mark.parametrize('n', [19_789_690_303_392_599_159_037, 98_789_690_423_392_599_179_037])
+def test_hypothesis(n):
+    solution_length = get_seq_len(n)
+    expected_length, expected_sequence = author_get_sequence_length(n)
+    assert solution_length == expected_length, f"Wrong length: " \
+                                               f"got {solution_length}, " \
+                                               f"but {expected_length} was expected"
