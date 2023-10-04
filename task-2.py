@@ -30,6 +30,7 @@ def author_get_longest_sequence(lower: int, upper: int) -> Tuple[int, int]:
     return max_n, max_length
 
 
+@pytest.mark.timeout(20)
 def test_get_sequence_length():
     for _ in range(10):
         test_n = random.randint(1, 100)
@@ -41,7 +42,7 @@ def test_get_sequence_length():
                                                    f"expected sequence for n = {test_n} is: " \
                                                    f"{expected_sequence}"
 
-
+@pytest.mark.timeout(20)
 def test_get_longest_sequence():
     for _ in range(10):
         lower = random.randint(1, 100)
@@ -54,6 +55,7 @@ def test_get_longest_sequence():
                                                    f"but {expected_length} was expected"
 
 
+@pytest.mark.timeout(20)
 @pytest.mark.parametrize('n', [19_789_690_303_392_599_159_037, 98_789_690_423_392_599_179_037])
 def test_hypothesis(n):
     solution_length = get_seq_len(n)
@@ -63,6 +65,7 @@ def test_hypothesis(n):
                                                f"but {expected_length} was expected"
 
 
+@pytest.mark.timeout(2)
 @pytest.mark.parametrize('arg', ['a', '1', '-1', -1, 1.0, 0.5, 0, '1/2', 'ahalay mahalay'])
 def test_bad_args_get_seq_len(arg):
     function_result = get_seq_len(arg)
@@ -71,9 +74,10 @@ def test_bad_args_get_seq_len(arg):
                                     f"function result: {function_result}"
 
 
+@pytest.mark.timeout(2)
 @pytest.mark.parametrize('lower', ['a', '1', '-1', -1, 1.0, 0.5, 0, '1/2', 'ahalay mahalay', 100])
 @pytest.mark.parametrize('upper', ['a', '1', '-1', -1, 1.0, 0.5, 0, '1/2', 'ahalay mahalay', 10])
-def test_bad_args_get_seq_len(lower, upper):
+def test_bad_args_get_longest_seq(lower, upper):
     print(lower, upper)
     try:
         function_result = get_longest_seq(lower, upper)
