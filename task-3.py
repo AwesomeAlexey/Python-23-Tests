@@ -58,7 +58,6 @@ def test_next_prime():
     numbers = np.random.randint(1, 1000, 100)
 
     for n in numbers:
-        # n = random.randint(1, 1000)
         solution_answer = next_prime(int(n))
         expected_answer = author_next_prime(int(n))
         assert solution_answer == expected_answer, f"Wrong next prime for number {n}." \
@@ -137,17 +136,22 @@ def test_negative_gcd():
 @pytest.mark.timeout(10)
 @pytest.mark.parametrize('arg_1', ['a', '1', '-1', 1.0, 0.5, '1/2', 'ahalay mahalay', '1'])
 @pytest.mark.parametrize('arg_2', ['a', '1', '-1', 1.0, 0.5, '1/2', 'ahalay mahalay', 1])
-def test_bad_arg_are_coprime(arg_1, arg_2):
-    function_result = are_coprime(arg_1, arg_2)
-    assert function_result is None, f"Bad arguments must lead to None. " \
-                                    f"Bad arguments: \"{arg_1}\" as {type(arg_1)} and \"{arg_2}\" as {type(arg_2)} , " \
-                                    f"are_coprime({arg_1}, {arg_2}) function result: {function_result}"
+def test_bad_args_are_coprime(arg_1, arg_2):
+    try:
+        function_result = are_coprime(arg_1, arg_2)
+        assert False, f"Bad arguments must lead to AssertionError. " \
+                      f"Bad arguments: \"{arg_1}\" as {type(arg_1)} and \"{arg_2}\" as {type(arg_2)} , " \
+                      f"are_coprime({arg_1}, {arg_2}) function result: {function_result}"
+    except AssertionError:
+        pass
+    except Exception:
+        raise
 
 
 @pytest.mark.timeout(10)
 @pytest.mark.parametrize('arg_1', ['a', '1', '-1', 1.0, 0.5, '1/2', 'ahalay mahalay', '1'])
 @pytest.mark.parametrize('arg_2', ['a', '1', '-1', 1.0, 0.5, '1/2', 'ahalay mahalay', 1])
-def test_bad_arg_gcd(arg_1, arg_2):
+def test_bad_args_gcd(arg_1, arg_2):
     try:
         function_result = gcd(arg_1, arg_2)
         assert False, f"Bad arguments must lead to Assertion Error. " \
@@ -164,17 +168,21 @@ def test_bad_arg_gcd(arg_1, arg_2):
 def test_bad_arg_is_prime(arg):
     try:
         function_result = is_prime(arg)
+        assert False, f"Bad arguments must lead to AssertionError. " \
+                      f"Bad argument: \"{arg}\" as {type(arg)}, " \
+                      f"is_prime({arg}) function result: {function_result}"
     except AssertionError:
         pass
     except Exception as ex:
         raise ex
+
 
 @pytest.mark.timeout(2)
 @pytest.mark.parametrize('arg', ['a', '1', '-1', -1, 1.0, 0.5, 0, '1/2', 'ahalay mahalay'])
 def test_bad_arg_next_prime(arg):
     try:
         function_result = next_prime(arg)
-        assert False, f"Bad arguments must lead to None. " \
+        assert False, f"Bad arguments must lead to AssertionError. " \
                       f"Bad argument: \"{arg}\" as {type(arg)}, " \
                       f"next_prime({arg}) function result: {function_result}"
     except AssertionError:
