@@ -134,6 +134,41 @@ def test_negative_gcd():
 
 
 @pytest.mark.timeout(10)
+def test_zero_is_coprime():
+    n = np.random.randint(-100, 100, 100)
+    for n_ in n:
+        a = 0
+        b = int(n_)
+        solution_coprime_left_zero = are_coprime(a, b)
+        solution_coprime_right_zero = are_coprime(a, b)
+        assert solution_coprime_left_zero == solution_coprime_right_zero, f"Why the results for are_coprime({a},{b})" \
+                                                                          f" = {solution_coprime_left_zero}" \
+                                                                          f"and are_coprime({b}, {a}) = " \
+                                                                          f"{solution_coprime_right_zero} " \
+                                                                          f"are not the same?"
+        solution_coprime = solution_coprime_left_zero
+        expected_coprime = author_are_coprime(a, b)
+        assert solution_coprime == expected_coprime, f"Wrong coprime-ness for numbers {a} and {b}," \
+                                                     f"Got: {solution_coprime}, but {expected_coprime} was expected"
+
+
+@pytest.mark.timeout(10)
+def test_zero_gcd():
+    n = np.random.randint(-100, 100, 100)
+    for n_ in n:
+        a = 0
+        b = int(n_)
+        solution_gcd_left_zero = gcd(a, b)
+        solution_gcd_right_zero = gcd(b, a)
+        assert solution_gcd_left_zero == solution_gcd_right_zero, f"Why the results for gcd({a},{b}) = {solution_gcd_left_zero}" \
+                                                                  f"and gcd({b}, {a}) = {solution_gcd_right_zero} are not the same?"
+        solution_gcd = solution_gcd_left_zero
+        expected_gcd = author_gcd(a, b)
+        assert solution_gcd == expected_gcd, f"Wrong gcd for numbers {a} and {b}," \
+                                             f"Got: {solution_gcd}, but {expected_gcd} was expected"
+
+
+@pytest.mark.timeout(10)
 @pytest.mark.parametrize('arg_1', ['a', '1', '-1', 1.0, 0.5, '1/2', 'ahalay mahalay', '1'])
 @pytest.mark.parametrize('arg_2', ['a', '1', '-1', 1.0, 0.5, '1/2', 'ahalay mahalay', 1])
 def test_bad_args_are_coprime(arg_1, arg_2):
