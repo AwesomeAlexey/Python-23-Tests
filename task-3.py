@@ -174,9 +174,11 @@ def test_zero_gcd():
 def test_bad_args_are_coprime(arg_1, arg_2):
     try:
         function_result = are_coprime(arg_1, arg_2)
-        assert False, f"Bad arguments must lead to AssertionError. " \
-                      f"Bad arguments: \"{arg_1}\" as {type(arg_1)} and \"{arg_2}\" as {type(arg_2)} , " \
-                      f"are_coprime({arg_1}, {arg_2}) function result: {function_result}"
+        msg = f"Bad arguments must lead to AssertionError. " \
+              f"Bad arguments: \"{arg_1}\" as {type(arg_1)} and \"{arg_2}\" as {type(arg_2)} , " \
+              f"are_coprime({arg_1}, {arg_2}) function result: {function_result}"
+        raise Exception(msg)
+
     except AssertionError:
         pass
     except Exception:
@@ -189,9 +191,11 @@ def test_bad_args_are_coprime(arg_1, arg_2):
 def test_bad_args_gcd(arg_1, arg_2):
     try:
         function_result = gcd(arg_1, arg_2)
-        assert False, f"Bad arguments must lead to Assertion Error. " \
-                      f"Bad arguments: \"{arg_1}\" as {type(arg_1)} and \"{arg_2}\" as {type(arg_2)} , " \
-                      f"gcd({arg_1}, {arg_2}) function result: {function_result}"
+        msg = f"Bad arguments must lead to Assertion Error. " \
+              f"Bad arguments: \"{arg_1}\" as {type(arg_1)} and \"{arg_2}\" as {type(arg_2)} , " \
+              f"gcd({arg_1}, {arg_2}) function result: {function_result}"
+        raise Exception(msg)
+
     except AssertionError:
         pass
     except Exception:
@@ -203,9 +207,11 @@ def test_bad_args_gcd(arg_1, arg_2):
 def test_bad_arg_is_prime(arg):
     try:
         function_result = is_prime(arg)
-        assert False, f"Bad arguments must lead to AssertionError. " \
-                      f"Bad argument: \"{arg}\" as {type(arg)}, " \
-                      f"is_prime({arg}) function result: {function_result}"
+        msg = f"Bad arguments must lead to AssertionError. " \
+              f"Bad argument: \"{arg}\" as {type(arg)}, " \
+              f"is_prime({arg}) function result: {function_result}"
+        raise Exception(msg)
+
     except AssertionError:
         pass
     except Exception as ex:
@@ -217,9 +223,11 @@ def test_bad_arg_is_prime(arg):
 def test_bad_arg_next_prime(arg):
     try:
         function_result = next_prime(arg)
-        assert False, f"Bad arguments must lead to AssertionError. " \
-                      f"Bad argument: \"{arg}\" as {type(arg)}, " \
-                      f"next_prime({arg}) function result: {function_result}"
+        msg = f"Bad arguments must lead to AssertionError. " \
+              f"Bad argument: \"{arg}\" as {type(arg)}, " \
+              f"next_prime({arg}) function result: {function_result}"
+        raise Exception(msg)
+
     except AssertionError:
         pass
     except Exception:
