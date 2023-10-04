@@ -42,12 +42,28 @@ def test_get_sequence_length():
                                                    f"expected sequence for n = {test_n} is: " \
                                                    f"{expected_sequence}"
 
+
 @pytest.mark.timeout(20)
 def test_get_longest_sequence():
     for _ in range(10):
         lower = random.randint(1, 100)
         upper = lower + random.randint(1, 100)
         solution_n, solution_length = get_longest_seq(lower, upper)
+        expected_n, expected_length = author_get_longest_sequence(lower, upper)
+        assert solution_n == expected_n, f"Wrong n. Got {solution_n}, but {expected_n} was expected"
+        assert solution_length == expected_length, f"Wrong length: " \
+                                                   f"got {solution_length}, " \
+                                                   f"but {expected_length} was expected"
+
+
+@pytest.mark.timeout(20)
+def test_get_longest_sequence_equal_borders():
+    for _ in range(10):
+        lower = random.randint(1, 100)
+        upper = lower
+        solution = get_longest_seq(lower, upper)
+        assert solution is not None, f"Lower == upper == {lower} is a valid args, because both borders are included"
+        solution_n, solution_length = solution
         expected_n, expected_length = author_get_longest_sequence(lower, upper)
         assert solution_n == expected_n, f"Wrong n. Got {solution_n}, but {expected_n} was expected"
         assert solution_length == expected_length, f"Wrong length: " \
@@ -82,8 +98,8 @@ def test_bad_args_get_longest_seq(lower, upper):
     try:
         function_result = get_longest_seq(lower, upper)
         assert function_result is None, f"Bad arguments must lead to None. " \
-                                    f"Bad arguments are: lower: \"{lower}\", upper: \"{upper}\"." \
-                                    f"function result: {function_result}"
+                                        f"Bad arguments are: lower: \"{lower}\", upper: \"{upper}\"." \
+                                        f"function result: {function_result}"
     except TypeError as ex:
         msg = f"Bad arguments must lead to None. " \
               f"Bad arguments are: lower: \"{lower}\", upper: \"{upper}\"." \
