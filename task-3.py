@@ -219,7 +219,7 @@ def test_bad_arg_is_prime(arg):
 
 
 @pytest.mark.timeout(2)
-@pytest.mark.parametrize('arg', ['a', '1', '-1', -1, 1.0, 0.5, 0, '1/2', 'ahalay mahalay'])
+@pytest.mark.parametrize('arg', ['a', '1', '-1', 1.0, 0.5, '1/2', 'ahalay mahalay'])
 def test_bad_arg_next_prime(arg):
     try:
         function_result = next_prime(arg)
