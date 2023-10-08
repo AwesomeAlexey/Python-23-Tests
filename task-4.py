@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 import os
 
-filename = '../bases.txt'
+filename = './bases.txt'
 field_size = 100
 
 
@@ -64,9 +64,9 @@ def test_missile_attack():
     radius = 10
     data = gen_data(nbases)
     data = compress_data(data)
-    outfile = '../outfile.txt'
+    outfile = './outfile.txt'
     os.system(f"rm {outfile}")
-    os.system(f"python3 ../app.py {filename} {radius} >> {outfile}")
+    os.system(f"python3 ./app.py {filename} {radius} >> {outfile}")
 
     x, y, points = np.loadtxt(outfile)
 
@@ -90,9 +90,9 @@ def test_missile_attack_small():
     radius = 15
     data = gen_data(nbases)
     data = compress_data(data)
-    outfile = '../outfile.txt'
+    outfile = './outfile_small.txt'
     os.system(f"rm {outfile}")
-    os.system(f"python3 ../app.py {filename} {radius} >> {outfile}")
+    os.system(f"python3 ./app.py {filename} {radius} >> {outfile}")
 
     x, y, points = np.loadtxt(outfile)
 
