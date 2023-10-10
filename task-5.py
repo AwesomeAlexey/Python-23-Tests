@@ -150,16 +150,21 @@ def test_phrase():
 
     run = subprocess.run([python_name, app_filename, filename, pattern], capture_output=True)
     out = run.stdout.decode()
-    print(out)
+    # print(out)
     lists = out.split('\n')
     strs_result = parse_list(lists[0])
-    floats_result = parse_list(lists[1])
-    ints_result = parse_list(lists[2])
+    ints_result = parse_list(lists[1])
+    floats_result = parse_list(lists[2])
     strs2_result = parse_list(lists[3])
 
-    assert strs_result == strs
-    assert floats_result == floats
-    assert ints_result == ints
-    assert strs2_result == strs2
+    expected_output = f"{strs}\n{ints}\n{floats}\n{strs2}"
+
+    msg = f"Expected output:\n\n{expected_output}\n\n" \
+          f"Your output:\n\n{out}"
+
+    assert strs_result == strs, msg
+    assert floats_result == floats, msg
+    assert ints_result == ints, msg
+    assert strs2_result == strs2, msg
 
 
