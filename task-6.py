@@ -74,7 +74,7 @@ def get_params(filename):
         return json.load(f)
 
 
-class KindaWrongSolution: # Испорченный вариант реализации, вам нужно сделать правильно :)
+class KindaWrongSolution:  # Испорченный вариант реализации, вам нужно сделать правильно :)
 
     def __init__(self, params):
         self.J = params["system_parameters"]["inertia_momentum"]
@@ -130,16 +130,6 @@ def match_solutions(submitted, expected):
         f"Your solution has wrong t, " \
         f"expected t = \n{e_dth}\nbut got t_actual = \n{s_dth}"
 
-# exit()
-
-
-
-# config = gen_config(500)
-filename = f"lots-of-u.json"
-
-# with open(Path(folder, filename), 'w') as f:
-#     json.dump(config, f, indent=4)
-
 
 def get_student_solution(config):
     dynamics = PendulumDynamics(config)
@@ -149,15 +139,6 @@ def get_student_solution(config):
 
 def get_expected_solution(config):
     return KindaWrongSolution(config).run()
-#
-# config = get_params(Path(data_folder, filename))
-#
-# sol = KindaWrongSolution(config).run()
-#
-# st_sol = get_student_solution(config)
-# plot_graphs(st_sol, sol)
-#
-# match_solutions(st_sol, sol)
 
 
 @pytest.mark.timeout(30 if not PLOT else 0)
