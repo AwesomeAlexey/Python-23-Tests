@@ -1,0 +1,249 @@
+import pytest
+import json
+import numpy as np
+from scipy.integrate import solve_ivp
+from pathlib import Path
+from matplotlib import pyplot as plt
+from app import PendulumDynamics, Simulator
+
+
+data_folder = Path('tests', 'task-6-data')
+ASSERT_PLOT = False
+ALWAYS_PLOT = False
+PLOT = ALWAYS_PLOT or ALWAYS_PLOT
+
+
+def plot_graphs(submitted, expected, task_title=None):
+    s_t, s_th, s_dth = submitted
+    e_t, e_th, e_dth = expected
+
+    extra_title = f" for \"{task_title}\"" if task_title is not None else ""
+
+    plt.figure()
+    plt.grid()
+    plt.plot(e_t, 'go--')
+    plt.plot(s_t, 'ro')
+    plt.title("t" + extra_title)
+
+    plt.figure()
+    plt.grid()
+    plt.plot(e_t, e_th, 'g')
+    plt.plot(s_t, s_th, 'r--')
+    plt.title("Theta(t)" + extra_title)
+
+    plt.figure()
+    plt.grid()
+    plt.plot(e_t, e_dth, 'g')
+    plt.plot(s_t, s_dth, 'r--')
+    plt.title("dTheta(t)" + extra_title)
+    plt.show()
+
+
+def gen_config(control_points: int):
+    np.random.seed(12)
+    mass = np.random.uniform(0.1, 5)
+    length = np.random.uniform(1, 1.5)
+    g = np.random.normal(9.8, 0.5)
+    system = {
+        "inertia_momentum": mass * (length ** 2) + np.random.uniform(1E-4, mass**2),
+        "dry_friction": np.random.random()*0.7,
+        "viscous_friction": np.random.random()*0.5,
+        "mass": mass,
+        "length": length,
+        "gravity_accel": g
+    }
+    time = np.linspace(0, 5, control_points)
+    simulation = {
+        "control_input":
+            {
+                "time": time.tolist(),
+                "value": (np.sin(time) * 2).tolist()
+            },
+        "initial_state": [0., 0.]
+    }
+
+    config = {
+        "system_parameters": system,
+        "simulation_parameters": simulation
+    }
+    return config
+
+
+def get_params(filename):
+    with open(filename) as f:
+        return json.load(f)
+
+
+class KindaWrongSolution: # Испорченный вариант реализации, вам нужно сделать правильно :)
+
+    def __init__(self, params):
+        self.J = params["system_parameters"]["inertia_momentum"]
+        self.kd = params["system_parameters"]["dry_friction"]
+        self.kv = params["system_parameters"]["viscous_friction"]
+        self.m = params["system_parameters"]["mass"]
+        self.L = params["system_parameters"]["length"]
+        self.g = params["system_parameters"]["gravity_accel"]
+        self.t_array = params["simulation_parameters"]["control_input"]["time"]
+        self.u_array = params["simulation_parameters"]["control_input"]["value"]
+        self.initial_state = params["simulation_parameters"]['initial_state']
+
+    def eval_u(self, time):
+        for i, t in enumerate(self.t_array):
+            if t >= time:
+                return self.u_array[i]
+        return self.u_array[-1]
+
+    def call(self, t, state):
+        theta, dtheta = state
+        d2theta = (-self.kd*np.sign(dtheta) - self.kv*dtheta -
+                   self.m * self.g * self.L * np.sin(theta) +
+                   self.eval_u(t)) / self.J
+        # print(t, dtheta)
+        return [dtheta, d2theta]
+
+    def run(self):
+        solution = solve_ivp(self.call, [self.t_array[0], self.t_array[-1]],
+                             self.initial_state, min_step=0.01, t_eval=self.t_array)
+        return solution.t, solution.y[0], solution.y[1]
+
+
+def match_solutions(submitted, expected):
+    s_t, s_th, s_dth = submitted
+    e_t, e_th, e_dth = expected
+    assert len(s_t) == len(e_t), f"Your solution has wrong size, " \
+                                 f"you should return values only for the given timestamps, " \
+                                 f"expected t = \n{e_t}\nbut got t_actual = \n{s_t}"
+    assert len(s_th) == len(e_th), f"Your solution has wrong size, " \
+                                   f"you should return values only for the given timestamps, " \
+                                   f"expected theta = \n{e_th}\nbut got theta_actual = \n{s_th}"
+    assert len(s_dth) == len(e_dth), f"Your solution has wrong size, " \
+                                     f"you should return values only for the given timestamps, " \
+                                     f"expected dtheta = \n{e_dth}\nbut got dtheta_actual = \n{s_dth}"
+
+    assert np.all(np.isclose(np.array(s_t), np.array(e_t))), \
+        f"Your solution has wrong t, " \
+        f"expected t = \n{e_t}\nbut got t_actual = \n{s_t}"
+    assert np.all(np.isclose(np.array(s_th), np.array(e_th))),\
+        f"Your solution has wrong theta, " \
+        f"expected theta = \n{e_th}\nbut got t_actual = \n{s_th}"
+    assert np.all(np.isclose(np.array(s_dth), np.array(e_dth))), \
+        f"Your solution has wrong t, " \
+        f"expected t = \n{e_dth}\nbut got t_actual = \n{s_dth}"
+
+# exit()
+
+
+
+# config = gen_config(500)
+filename = f"lots-of-u.json"
+
+# with open(Path(folder, filename), 'w') as f:
+#     json.dump(config, f, indent=4)
+
+
+def get_student_solution(config):
+    dynamics = PendulumDynamics(config)
+    simulation = Simulator(config)
+    return simulation.run(dynamics)
+
+
+def get_expected_solution(config):
+    return KindaWrongSolution(config).run()
+#
+# config = get_params(Path(data_folder, filename))
+#
+# sol = KindaWrongSolution(config).run()
+#
+# st_sol = get_student_solution(config)
+# plot_graphs(st_sol, sol)
+#
+# match_solutions(st_sol, sol)
+
+
+@pytest.mark.timeout(30 if not PLOT else 0)
+def test_zero_u():
+    config_name = 'zero-u.json'
+    config = get_params(Path(data_folder, config_name))
+    student_sol = get_student_solution(config)
+    expected_sol = get_expected_solution(config)
+
+    if ALWAYS_PLOT:
+        plot_graphs(student_sol, expected_sol, 'zero_u')
+
+    try:
+        match_solutions(student_sol, expected_sol)
+    except AssertionError:
+        if ASSERT_PLOT:
+            plot_graphs(student_sol, expected_sol, 'zero_u')
+        raise
+
+
+@pytest.mark.timeout(30 if not PLOT else 0)
+def test_stable_u():
+    config_name = 'stable-u.json'
+    config = get_params(Path(data_folder, config_name))
+    student_sol = get_student_solution(config)
+    expected_sol = get_expected_solution(config)
+
+    if ALWAYS_PLOT:
+        plot_graphs(student_sol, expected_sol, 'stable_u')
+
+    try:
+        match_solutions(student_sol, expected_sol)
+    except AssertionError:
+        if ASSERT_PLOT:
+            plot_graphs(student_sol, expected_sol, 'stable_u')
+        raise
+
+
+@pytest.mark.timeout(30 if not PLOT else 0)
+def test_cos_u():
+    config_name = 'cos-u.json'
+    config = get_params(Path(data_folder, config_name))
+    student_sol = get_student_solution(config)
+    expected_sol = get_expected_solution(config)
+
+    if ALWAYS_PLOT:
+        plot_graphs(student_sol, expected_sol, 'cos_u')
+
+    try:
+        match_solutions(student_sol, expected_sol)
+    except AssertionError:
+        if ASSERT_PLOT:
+            plot_graphs(student_sol, expected_sol, 'cos_u')
+        raise
+
+
+@pytest.mark.timeout(30 if not PLOT else 0)
+def test_sin_u():
+    config_name = 'sin-u.json'
+    config = get_params(Path(data_folder, config_name))
+    student_sol = get_student_solution(config)
+    expected_sol = get_expected_solution(config)
+
+    if ALWAYS_PLOT:
+        plot_graphs(student_sol, expected_sol, 'sin_u')
+
+    try:
+        match_solutions(student_sol, expected_sol)
+    except AssertionError:
+        if ASSERT_PLOT:
+            plot_graphs(student_sol, expected_sol, 'sin_u')
+        raise
+
+
+@pytest.mark.timeout(30 if not PLOT else 0)
+def test_lots_of_u():
+    config_name = 'lots-of-u.json'
+    config = get_params(Path(data_folder, config_name))
+    student_sol = get_student_solution(config)
+    expected_sol = get_expected_solution(config)
+
+    if ALWAYS_PLOT:
+        plot_graphs(student_sol, expected_sol, 'lots-of-u')
+    try:
+        match_solutions(student_sol, expected_sol)
+    except AssertionError:
+        if ASSERT_PLOT:
+            plot_graphs(student_sol, expected_sol, 'lots-of-u')
+        raise
