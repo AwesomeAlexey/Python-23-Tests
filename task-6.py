@@ -1,10 +1,10 @@
 import pytest
 import json
 import numpy as np
-from scipy.integrate import solve_ivp
+from scipy.integrate import ode
 from pathlib import Path
 from matplotlib import pyplot as plt
-from app import PendulumDynamics, Simulator
+from pendulum_simulator import PendulumDynamics, Simulator
 
 
 data_folder = Path('tests', 'task-6-data')
@@ -86,6 +86,7 @@ class KindaWrongSolution:  # Испорченный вариант реализ�
         self.t_array = params["simulation_parameters"]["control_input"]["time"]
         self.u_array = params["simulation_parameters"]["control_input"]["value"]
         self.initial_state = params["simulation_parameters"]['initial_state']
+        self.u = 0
 
     def eval_u(self, time):
         for i, t in enumerate(self.t_array):
@@ -93,18 +94,36 @@ class KindaWrongSolution:  # Испорченный вариант реализ�
                 return self.u_array[i]
         return self.u_array[-1]
 
+    @staticmethod
+    def soft_sign(x):
+        eps = 1e-2
+        return x / (abs(x) + eps)
+
     def call(self, t, state):
         theta, dtheta = state
-        d2theta = (-self.kd*np.sign(dtheta) - self.kv*dtheta -
+        d2theta = (-self.kd*self.soft_sign(dtheta) - self.kv*dtheta -
                    self.m * self.g * self.L * np.sin(theta) +
-                   self.eval_u(t)) / self.J
+                   self.u) / self.J
         # print(t, dtheta)
         return [dtheta, d2theta]
 
     def run(self):
-        solution = solve_ivp(self.call, [self.t_array[0], self.t_array[-1]],
-                             self.initial_state, min_step=0.01, t_eval=self.t_array)
-        return solution.t, solution.y[0], solution.y[1]
+
+        solver = ode(self.call)
+        solver.set_integrator('dopri5', atol=1e-8, rtol=1e-8, max_step=1e-3, nsteps=1000)
+        solver = solver.set_initial_value(self.initial_state)
+        theta = [self.initial_state[0]]
+        dtheta = [self.initial_state[1]]
+
+        for t, u in zip(self.t_array[1:], self.u_array[:-1]):
+            # print(t, u)
+            assert solver.successful()
+            self.u = u
+            th, dth = solver.integrate(t)
+            theta.append(th)
+            dtheta.append(dth)
+
+        return self.t_array, theta, dtheta
 
 
 def match_solutions(submitted, expected):
@@ -132,9 +151,22 @@ def match_solutions(submitted, expected):
 
 
 def get_student_solution(config):
-    dynamics = PendulumDynamics(config)
-    simulation = Simulator(config)
-    return simulation.run(dynamics)
+
+    J = config["system_parameters"]["inertia_momentum"]
+    Kd = config["system_parameters"]["dry_friction"]
+    Kv = config["system_parameters"]["viscous_friction"]
+    m = config["system_parameters"]["mass"]
+    L = config["system_parameters"]["length"]
+    g = config["system_parameters"]["gravity_accel"]
+    t_array = config["simulation_parameters"]["control_input"]["time"]
+    u_array = config["simulation_parameters"]["control_input"]["value"]
+    initial_state = config["simulation_parameters"]['initial_state']
+
+    pendulum = PendulumDynamics(J=J, Kd=Kd, Kv=Kv, m=m, L=L, g=g)
+    simulator = Simulator(t_array=t_array, u_array=u_array,
+                          initial_state=initial_state,
+                          dynamics=pendulum)
+    return simulator.run()
 
 
 def get_expected_solution(config):
@@ -143,7 +175,7 @@ def get_expected_solution(config):
 
 @pytest.mark.timeout(30 if not PLOT else 0)
 def test_zero_u():
-    config_name = 'zero-u.json'
+    config_name = 'parameters1.json'
     config = get_params(Path(data_folder, config_name))
     student_sol = get_student_solution(config)
     expected_sol = get_expected_solution(config)
