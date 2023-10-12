@@ -175,7 +175,7 @@ def get_expected_solution(config):
 
 @pytest.mark.timeout(30 if not PLOT else 0)
 def test_zero_u():
-    config_name = 'parameters1.json'
+    config_name = 'zero-u.json'
     config = get_params(Path(data_folder, config_name))
     student_sol = get_student_solution(config)
     expected_sol = get_expected_solution(config)
